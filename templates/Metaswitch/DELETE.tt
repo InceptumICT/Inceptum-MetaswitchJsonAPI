@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sh="http://www.metaswitch.com/ems/soap/sh" xmlns:user="http://www.metaswitch.com/ems/soap/sh/userdata" xmlns:ser="http://www.metaswitch.com/ems/soap/sh/servicedata">
+  <soapenv:Header/>
+  <soapenv:Body>
+[%
+	IF Data.SequenceNumber == 0;
+		Data.SequenceNumber=1;
+	END 
+%]
+
+[% IF Data.EASon %]
+      <sh:ShUpdate xmlns:sh="http://www.metaswitch.com/srb/soap/sh">
+        <sh:UserIdentity>[% Data.UserIdentity %]</sh:UserIdentity>
+        <sh:DataReference>0</sh:DataReference>
+        <sh:UserData>
+          <user:Sh-Data xmlns:user="http://www.metaswitch.com/sdp/soap/sh/userdata">
+              <user:RepositoryData>
+                <user:ServiceIndication>[% Data.ServiceIndication %]</user:ServiceIndication>
+                <user:SequenceNumber>[% Data.SequenceNumber %]</user:SequenceNumber>
+                <user:ServiceData>
+[% PERL %]
+my $ServiceInd = "[% Data.ServiceIndication %]";
+if (index ($ServiceInd,"Msph_") == 0) {
+	print '                    <ser:MetaSphereData xmlns:ser="http://www.metaswitch.com/sdp/soap/sh/servicedata">';
+}else{
+	print '                    <ser:MetaSwitchData xmlns:ser="http://www.metaswitch.com/ems/soap/sh/servicedata" IgnoreSequenceNumber="False" MetaSwitchVersion="1">';
+}
+[% END %]
+                      <ser:[% Data.ServiceIndication %] Action="delete">
+                      </ser:[% Data.ServiceIndication %]>
+[% PERL %]
+my $ServiceInd = "[% Data.ServiceIndication %]";
+if (index ($ServiceInd,"Msph_") == 0) {
+	print '                    </ser:MetaSphereData>';
+}else{
+	print '                    </ser:MetaSwitchData>';
+}
+[% END %]
+[% ELSE %]
+      <sh:ShUpdate>
+        <sh:UserIdentity>[% Data.UserIdentity %]</sh:UserIdentity>
+        <sh:DataReference>0</sh:DataReference>
+        <sh:UserData>
+          <user:Sh-Data>
+              <user:RepositoryData>
+                <user:ServiceIndication>[% Data.ServiceIndication %]</user:ServiceIndication>
+                <user:SequenceNumber>1</user:SequenceNumber>
+                <user:ServiceData>
+                    <ser:MetaSwitchData IgnoreSequenceNumber="True" MetaSwitchVersion="1">
+                      <ser:[% Data.ServiceIndication %] Action="delete">
+                      </ser:[% Data.ServiceIndication %]>
+                    </ser:MetaSwitchData>
+[% END %]
+				</user:ServiceData>
+              </user:RepositoryData>
+          </user:Sh-Data>
+        </sh:UserData>
+        <sh:OriginHost>[% Data.OriginHost %]</sh:OriginHost>
+      </sh:ShUpdate>
+  </soapenv:Body>
+</soapenv:Envelope>

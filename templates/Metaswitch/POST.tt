@@ -1,0 +1,383 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sh="http://www.metaswitch.com/ems/soap/sh" xmlns:user="http://www.metaswitch.com/ems/soap/sh/userdata" xmlns:ser="http://www.metaswitch.com/ems/soap/sh/servicedata">
+  <soapenv:Header/>
+  <soapenv:Body>
+[% IF Data.EASon %]
+      <sh:ShUpdate xmlns:sh="http://www.metaswitch.com/srb/soap/sh">
+[% ELSE %]
+      <sh:ShUpdate>
+[% END %]
+        <sh:UserIdentity>[% Data.DirectoryNumber %]</sh:UserIdentity>
+        <sh:DataReference>0</sh:DataReference>
+        <sh:UserData>
+[% IF Data.EASon %]
+          <user:Sh-Data xmlns:user="http://www.metaswitch.com/sdp/soap/sh/userdata">
+[% ELSE %]
+          <user:Sh-Data>
+[% END %]
+              <user:RepositoryData>
+                <user:ServiceIndication>[% Data.ServiceIndication %]</user:ServiceIndication>
+                <user:SequenceNumber>[% Data.SequenceNumber %]</user:SequenceNumber>
+                <user:ServiceData>
+[% IF Data.EASon %]
+[% PERL %]
+my $ServiceInd = "[% Data.ServiceIndication %]";
+if (index ($ServiceInd,"Msph_") == 0) {
+	print '                    <ser:MetaSphereData xmlns:ser="http://www.metaswitch.com/sdp/soap/sh/servicedata">';
+}else{
+	print '                    <ser:MetaSwitchData xmlns:ser="http://www.metaswitch.com/ems/soap/sh/servicedata" IgnoreSequenceNumber="False" MetaSwitchVersion="1">';
+}
+[% END %]
+[% ELSE %]
+                    <ser:MetaSwitchData IgnoreSequenceNumber="False" MetaSwitchVersion="1">
+[% END %]
+[% IF Data.ServiceIndication == 'Meta_Subscriber_PriorityCall_NumbersList' || Data.ServiceIndication == "Meta_Subscriber_SelectiveCallRejection_NumbersList" || Data.ServiceIndication == "Meta_Subscriber_SpeedCalling_NumbersList" || Data.ServiceIndication == "Meta_ConfiguredSIPBinding_CustomerInformation" || Data.ServiceIndication == "Meta_PBX_LinesList" || Data.ServiceIndication == 'Meta_PBX_DirectInwardCalling' %]
+						<ser:[% Data.ServiceIndication %]>
+[% ELSIF Data.ServiceIndication == 'Meta_Subscriber_SelectiveCallForwarding_NumbersList' || Data.ServiceIndication == "Meta_PBX_SelectiveCallForwarding_NumbersList" || Data.ServiceIndication == 'Meta_PBX_DoNotDisturb_SCANumbersList' || Data.ServiceIndication == 'Meta_Subscriber_DoNotDisturb_SCANumbersList' %]
+						<ser:[% Data.ServiceIndication %]>
+[% ELSIF Data.ServiceIndication == 'Meta_PBX_SelectiveCallRejection_NumbersList' || Data.ServiceIndication == 'Meta_CallPickupGroup_MembersList' || Data.ServiceIndication == 'Meta_CallPickupGroup_PossibleMembersList'  %]
+						<ser:[% Data.ServiceIndication %]>
+[% ELSIF Data.ServiceIndication == 'Meta_BusinessGroup_ChildrenList_Department' || Data.ServiceIndication == 'Meta_MLHG_MembersList' %]
+						<ser:[% Data.ServiceIndication %]>
+[% ELSE %]
+						<ser:[% Data.ServiceIndication %] Action="apply">
+[% END %]
+[% RenderBlockStart("ItemBlock") %]
+# Values START
+[% IF Data.ItemName == 'ValidAccountCodes' %]
+						<ser:ValidAccountCodes>
+[% FOREACH Item IN Data.ItemValue %]
+							<ser:AccountCode>
+								<ser:Code>[% Item.Code %]</ser:Code>
+								<ser:Description>[% Item.Description %]</ser:Description>
+							</ser:AccountCode>
+[% END %]
+						</ser:ValidAccountCodes>
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_Subscriber_SpeedCalling_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>
+							<ser:SpeedCallingCode>[% Item.SpeedCallingCode %]</ser:SpeedCallingCode>
+							<ser:SpeedCallingNumber>[% Item.SpeedCallingNumber %]</ser:SpeedCallingNumber>
+						</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_Subscriber_PriorityCall_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_Subscriber_SelectiveCallRejection_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_Subscriber_SelectiveCallForwarding_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_PBX_SelectiveCallForwarding_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_PBX_DoNotDisturb_SCANumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_Subscriber_DoNotDisturb_SCANumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Number' && Data.ServiceIndication == 'Meta_PBX_SelectiveCallRejection_NumbersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Number>[% Item %]</ser:Number>
+[% END %]
+[% ELSIF Data.ItemName == 'Member' && Data.ServiceIndication == 'Meta_CallPickupGroup_MembersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Member>
+							<ser:MemberDirectoryNumber>[% Item.MemberDirectoryNumber %]</ser:MemberDirectoryNumber>
+							<ser:Department>[% Item.Department %]</ser:Department>
+						</ser:Member>
+[% END %]
+[% ELSIF Data.ItemName == 'Member' && Data.ServiceIndication == 'Meta_CallPickupGroup_PossibleMembersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Member>
+							<ser:MemberDirectoryNumber>[% Item.MemberDirectoryNumber %]</ser:MemberDirectoryNumber>
+							<ser:Department>[% Item.Department %]</ser:Department>
+						</ser:Member>
+[% END %]
+[% ELSIF Data.ItemName == 'Department' && Data.ServiceIndication == 'Meta_BusinessGroup_ChildrenList_Department'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Department>
+							<ser:Name>[% Item.Name %]</ser:Name>
+							<ser:FullName>[% Item.FullName %]</ser:FullName>
+[% IF Item.ParentDepartment %]
+							<ser:ParentDepartment>[% Item.ParentDepartment %]</ser:ParentDepartment>
+[% END %]
+[% IF Item.ExternalCallsSupport %]
+							<ser:ExternalCallsSupport>[% Item.ExternalCallsSupport %]</ser:ExternalCallsSupport>
+[% END %]
+[% IF Item.MaximumExternalCalls %]
+							<ser:MaximumExternalCalls>[% Item.MaximumExternalCalls %]</ser:MaximumExternalCalls>
+[% END %]
+[% IF Item.TerminatingCallsSupport %]
+							<ser:TerminatingCallsSupport>[% Item.TerminatingCallsSupport %]</ser:TerminatingCallsSupport>
+[% END %]
+[% IF Item.MaximumTerminatingCalls %]
+							<ser:MaximumTerminatingCalls>[% Item.MaximumTerminatingCalls %]</ser:MaximumTerminatingCalls>
+[% END %]
+[% IF Item.OriginatingCallsSupport %]
+							<ser:OriginatingCallsSupport>[% Item.OriginatingCallsSupport %]</ser:OriginatingCallsSupport>
+[% END %]
+[% IF Item.MaximumOriginatingCalls %]
+							<ser:MaximumOriginatingCalls>[% Item.MaximumOriginatingCalls %]</ser:MaximumOriginatingCalls>
+[% END %]
+						</ser:Department>
+[% END %]
+[% ELSIF Data.ItemName == 'Member' && Data.ServiceIndication == 'Meta_MLHG_MembersList'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Member>
+							<ser:MemberDirectoryNumber>[% Item.MemberDirectoryNumber %]</ser:MemberDirectoryNumber>
+[% IF Item.LoginLogoutSupported %]
+							<ser:LoginLogoutSupported>[% Item.LoginLogoutSupported %]</ser:LoginLogoutSupported>
+[% END %]
+[% IF Item.LoggedIn %]
+							<ser:LoggedIn>[% Item.LoggedIn %]</ser:LoggedIn>
+[% END %]
+[% IF Item.SubscriberType %]
+							<ser:SubscriberType>[% Item.SubscriberType %]</ser:SubscriberType>
+[% END %]
+[% IF Item.IntercomDialingCode %]
+							<ser:IntercomDialingCode>[% Item.IntercomDialingCode %]</ser:IntercomDialingCode>
+[% END %]
+[% IF Item.Name %]
+							<ser:Name>[% Item.Name %]</ser:Name>
+[% END %]
+[% IF Item.Department %]
+							<ser:Department>[% Item.Department %]</ser:Department>
+[% END %]
+[% IF Item.MLHGName %]
+							<ser:MLHGName>[% Item.MLHGName %]</ser:MLHGName>
+[% END %]
+						</ser:Member>
+[% END %]
+
+
+[% ELSIF Data.ItemName == 'Device' && Data.ServiceIndication == 'Msph_Subscriber_BaseInformation'%]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Device>
+							<ser:PhoneNumber>[% Item.PhoneNumber %]</ser:PhoneNumber>
+[% IF Item.AnsweringService %]
+							<ser:AnsweringService>[% Item.AnsweringService %]</ser:AnsweringService>
+[% END %]
+[% IF Item.DeviceType %]
+							<ser:DeviceType>[% Item.DeviceType %]</ser:DeviceType>
+[% END %]
+[% IF Item.HostSwitch %]
+							<ser:HostSwitch>
+								<ser:UseDefault>[% Item.HostSwitch.UseDefault %]</ser:UseDefault>
+								<ser:Value>[% Item.HostSwitch.Value %]</ser:Value>
+							</ser:HostSwitch>
+[% END %]
+[% IF Item.AlternateNumberForOutdial %]
+							<ser:AlternateNumberForOutdial>[% Item.AlternateNumberForOutdial %]</ser:AlternateNumberForOutdial>
+[% END %]
+[% IF Item.AddedThroughSelfCare %]
+							<ser:AddedThroughSelfCare>[% Item.AddedThroughSelfCare %]</ser:AddedThroughSelfCare>
+[% END %]
+[% IF Item.iPhoneDevice %]
+							<ser:iPhoneDevice>[% Item.iPhoneDevice %]</ser:iPhoneDevice>
+[% END %]
+[% IF Item.IMSI %]
+							<ser:IMSI>[% Item.IMSI %]</ser:IMSI>
+[% END %]
+						</ser:Device>
+[% END %]
+#
+#
+# PBX Line
+[% ELSIF Data.ItemName == 'Line' && Data.ServiceIndication == 'Meta_PBX_LinesList' %]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:Line>
+[% IF Item.TerminalIndex %]
+							<ser:TerminalIndex>[% Item.TerminalIndex %]</ser:TerminalIndex>
+[% END %]
+[% IF Item.SignalingType %]
+							<ser:SignalingType>[% Item.SignalingType %]</ser:SignalingType>
+[% END %]
+[% IF Item.ConfiguredSIPBinding %]
+							<ser:ConfiguredSIPBinding>[% Item.ConfiguredSIPBinding %]</ser:ConfiguredSIPBinding>
+[% END %]
+
+[% IF Item.ISDNDefaultBearerCapabilities %]
+							<ser:ISDNDefaultBearerCapabilities>
+[% IF Item.ISDNDefaultBearerCapabilities.SpeechOr3_1KHzAudio %]
+								<ser:SpeechOr3.1KHzAudio>[% Item.ISDNDefaultBearerCapabilities.SpeechOr3_1KHzAudio %]</ser:SpeechOr3.1KHzAudio>
+[% END %]
+[% IF Item.ISDNDefaultBearerCapabilities.SixFourKbpsData %]
+								<ser:SixFourKbpsData>[% Item.ISDNDefaultBearerCapabilities.SixFourKbpsData %]</ser:SixFourKbpsData>
+[% END %]
+[% IF Item.ISDNDefaultBearerCapabilities.FiveSixKbpsData %]
+								<ser:FiveSixKbpsData>[% Item.ISDNDefaultBearerCapabilities.FiveSixKbpsData %]</ser:FiveSixKbpsData>
+[% END %]
+[% IF Item.ISDNDefaultBearerCapabilities.SixFourKbpsRestricted %]
+								<ser:SixFourKbpsRestricted>[% Item.ISDNDefaultBearerCapabilities.SixFourKbpsRestricted %]</ser:SixFourKbpsRestricted>
+[% END %]
+							</ser:ISDNDefaultBearerCapabilities>
+[% END %]
+[% IF Item.MaximumCallAppearances %]
+[% IF !Item.MaximumCallAppearances.UseDefault %]
+[% Item.MaximumCallAppearances.UseDefault = 'False' %]
+[% END %]
+[% IF !Item.MaximumCallAppearances.Value %]
+[% Item.MaximumCallAppearances.Value = '64' %]
+[% END %]
+							<ser:MaximumCallAppearances>
+								<ser:UseDefault>[% Item.MaximumCallAppearances.UseDefault %]</ser:UseDefault>
+								<ser:Value>[% Item.MaximumCallAppearances.Value %]</ser:Value>
+							</ser:MaximumCallAppearances>
+[% END %]
+[% IF Item.CallBurstThreshold %]
+							<ser:CallBurstThreshold>[% Item.CallBurstThreshold %]</ser:CallBurstThreshold>
+[% END %]
+[% IF Item.LineUsage %]
+							<ser:LineUsage>[% Item.LineUsage %]</ser:LineUsage>
+[% END %]
+[% IF Item.GR303NailedUpConnection %]
+							<ser:GR303NailedUpConnection>[% Item.GR303NailedUpConnection %]</ser:GR303NailedUpConnection>
+[% END %]
+[% IF Item.PreSubscribedConnection %]
+							<ser:PreSubscribedConnection>[% Item.PreSubscribedConnection %]</ser:PreSubscribedConnection>
+[% END %]
+[% IF Item.LineSideAnswerSupervisionSupported %]
+							<ser:LineSideAnswerSupervisionSupported>[% Item.LineSideAnswerSupervisionSupported %]</ser:LineSideAnswerSupervisionSupported>
+[% END %]
+[% IF Item.PBXPlaysRingback %]
+							<ser:PBXPlaysRingback>[% Item.PBXPlaysRingback %]</ser:PBXPlaysRingback>
+[% END %]
+[% IF Item.PBXPlaysDialtone %]
+							<ser:PBXPlaysDialtone>[% Item.PBXPlaysDialtone %]</ser:PBXPlaysDialtone>
+[% END %]
+[% IF Item.DiagnosticsLogLevel %]
+							<ser:DiagnosticsLogLevel>[% Item.DiagnosticsLogLevel %]</ser:DiagnosticsLogLevel>
+[% END %]
+[% IF Item.DiagnosticsAPITraceEnabled %]
+							<ser:DiagnosticsAPITraceEnabled>[% Item.DiagnosticsAPITraceEnabled %]</ser:DiagnosticsAPITraceEnabled>
+[% END %]
+[% IF Item.RequestedStatus %]
+							<ser:RequestedStatus>[% Item.RequestedStatus %]</ser:RequestedStatus>
+[% END %]
+						</ser:Line>
+[% END %]
+# PBX Line
+#
+#
+# PBX Direct Inward Calling
+#
+[% ELSIF Data.ItemName == 'DirectInwardCalling' && Data.ServiceIndication == 'Meta_PBX_DirectInwardCalling' %]
+[% FOREACH Item IN Data.ItemValue %]
+						<ser:DirectInwardCalling>
+[% IF Item.Type %]
+							<ser:Type>[% Item.Type %]</ser:Type>
+[% END %]
+[% IF Item.Description %]
+							<ser:Description>[% Item.Description %]</ser:Description>
+[% END %]
+[% IF Item.RangeSize %]
+							<ser:RangeSize>[% Item.RangeSize %]</ser:RangeSize>
+[% END %]
+[% IF Item.FirstDirectoryNumber %]
+							<ser:FirstDirectoryNumber>[% Item.FirstDirectoryNumber %]</ser:FirstDirectoryNumber>
+[% END %]
+[% IF Item.FirstCode %]
+							<ser:FirstCode>[% Item.FirstCode %]</ser:FirstCode>
+[% END %]
+[% IF Item.LimitIncomingCalls %]
+							<ser:LimitIncomingCalls>[% Item.LimitIncomingCalls %]</ser:LimitIncomingCalls>
+[% END %]
+[% IF Item.MaximumIncomingCalls %]
+							<ser:MaximumIncomingCalls>[% Item.MaximumIncomingCalls %]</ser:MaximumIncomingCalls>
+[% END %]
+[% IF Item.NumberStatus %]
+[% IF !Item.NumberStatus.UseDefault %]
+[% Item.NumberStatus.UseDefault = 'True' %]
+[% END %]
+[% IF !Item.NumberStatus.Value %]
+[% Item.NumberStatus.Value = 'Normal' %]
+[% END %]
+							<ser:NumberStatus>
+								<ser:UseDefault>[% Item.NumberStatus.UseDefault %]</ser:UseDefault>
+								<ser:Value>[% Item.NumberStatus.Value %]</ser:Value>
+							</ser:NumberStatus>
+[% END %]
+[% IF Item.ConnectCallAfterAnnouncement %]
+							<ser:ConnectCallAfterAnnouncement>[% Item.ConnectCallAfterAnnouncement %]</ser:ConnectCallAfterAnnouncement>
+[% END %]
+[% IF Item.ForceLNPLookup %]
+[% IF !Item.ForceLNPLookup.UseDefault %]
+[% Item.ForceLNPLookup.UseDefault = 'True' %]
+[% END %]
+[% IF !Item.ForceLNPLookup.Value %]
+[% Item.ForceLNPLookup.Value = 'False' %]
+[% END %]
+							<ser:ForceLNPLookup>
+								<ser:UseDefault>[% Item.ForceLNPLookup.UseDefault %]</ser:UseDefault>
+								<ser:Value>[% Item.ForceLNPLookup.Value %]</ser:Value>
+							</ser:ForceLNPLookup>
+[% END %]
+[% IF Item.DeleteAction %]
+							<ser:DeleteAction>[% Item.DeleteAction %]</ser:DeleteAction>
+[% END %]
+[% IF Item.TwinnedStatus %]
+							<ser:TwinnedStatus>[% Item.TwinnedStatus %]</ser:TwinnedStatus>
+[% END %]
+[% IF Item.CreateTwinnedBGNumberBlock %]
+							<ser:CreateTwinnedBGNumberBlock>[% Item.CreateTwinnedBGNumberBlock %]</ser:CreateTwinnedBGNumberBlock>
+[% END %]
+[% IF Item.RequestedStatus %]
+							<ser:RequestedStatus>[% Item.RequestedStatus %]</ser:RequestedStatus>
+[% END %]
+						</ser:DirectInwardCalling>
+[% END %]
+#
+# PBX Direct Inward Calling
+#					
+[% ELSIF Data.TYPETYPE == 'Value' %]
+						<ser:[% Data.ItemName %]>[% Data.ItemValue | html %]</ser:[% Data.ItemName %]>
+# Values END
+# Values START complex
+[% ELSIF Data.TYPETYPE == 'Hash' %]
+						<ser:[% Data.ItemName %] [% Data.INdata %]>
+							[% Data.OUTdata %]
+						</ser:[% Data.ItemName %]>
+# Values END complex
+# Attribute: RoutingAttributes START 
+[% ELSIF Data.ItemName == 'RoutingAttributes' %]
+						<ser:RoutingAttributes>
+						  <ser:UseDefault>[% Data.UseDefault %]</ser:UseDefault>
+						  <ser:Value>
+							 <ser:Pre-paidOff-switchCallingCardSubscriber Default="[% Data.Pre_paidOff_switchCallingCardSubscriber.Default %]">[% Data.Pre_paidOff_switchCallingCardSubscriber.Value %]</ser:Pre-paidOff-switchCallingCardSubscriber>
+							 <ser:FaxModemSubscriber Default="[% Data.FaxModemSubscriber.Default %]">[% Data.FaxModemSubscriber.Value %]</ser:FaxModemSubscriber>
+							 <ser:NomadicSubscriber Default="[% Data.NomadicSubscriber.Default %]">[% Data.NomadicSubscriber.Value %]</ser:NomadicSubscriber>
+						  </ser:Value>
+						</ser:RoutingAttributes>
+[% END %]
+# Attribute: RoutingAttributes END 
+[% RenderBlockEnd("ItemBlock") %]						  
+                      </ser:[% Data.ServiceIndication %]>
+[% IF Data.EASon %]
+[% PERL %]
+my $ServiceInd = "[% Data.ServiceIndication %]";
+if (index ($ServiceInd,"Msph_") == 0) {
+	print '                    </ser:MetaSphereData>';
+}else{
+	print '                    </ser:MetaSwitchData>';
+}
+[% END %]
+[% ELSE %]
+                    </ser:MetaSwitchData>
+[% END %]
+                </user:ServiceData>
+              </user:RepositoryData>
+          </user:Sh-Data>
+        </sh:UserData>
+        <sh:OriginHost>[% Data.OriginHost %]</sh:OriginHost>
+      </sh:ShUpdate>
+  </soapenv:Body>
+</soapenv:Envelope>
