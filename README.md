@@ -1,5 +1,6 @@
 # Inceptum-MetaswitchJsonAPI
 JSON API Proxy to Metaswitch Voice platform.
+
 This API provides JSON access to Metaswitch Voice platform for provisioning single and PBX lines.
 This code is suitable for CentOS 7.x OS, but it should work on other linux/unix system.
 Required components which should be preinstalled are:
@@ -13,8 +14,8 @@ Required components which should be preinstalled are:
     use lib "/usr/local/umboss/lib";
   - linux modules required: libapreq2, perl-libapreq2
     - Installation this modules on CentOS
-      yum install libapreq2
-      yum install perl-libapreq2
+      - yum install libapreq2
+      - yum install perl-libapreq2
     
 Authentication is defined inside perl module Kernel/Config/MetaswitchAuth.pm withe simple user<=>token pair.
 Configuration of some Metaswitch provisioning objects should be defined in file Kernel/Config/MetaswitchRESTapi.pm.
