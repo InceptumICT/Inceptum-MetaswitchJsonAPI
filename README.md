@@ -20,4 +20,4 @@ Required components which should be preinstalled are:
 Authentication is defined inside perl module Kernel/Config/MetaswitchAuth.pm withe simple user<=>token pair.
 Configuration of some Metaswitch provisioning objects should be defined in file Kernel/Config/MetaswitchRESTapi.pm.
 
-Have a fun!!!
+Have fun!!!
