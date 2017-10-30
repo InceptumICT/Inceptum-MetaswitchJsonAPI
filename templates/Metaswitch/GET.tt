@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/" xmlns:sh="http://www.metaswitch.com/ems/soap/sh">
+    <soapenv:Header/>
+    <soapenv:Body>
+[% IF Data.EASon %]
+        <sh:ShPull xmlns:sh="http://www.metaswitch.com/srb/soap/sh">
+[% ELSE %]
+        <sh:ShPull>
+[% END %]
+[% IF Data.UserIdentity %]
+            <sh:UserIdentity>[% Data.UserIdentity %]</sh:UserIdentity>
+[% END %]
+            <sh:DataReference>0</sh:DataReference>
+            <sh:ServiceIndication>[% Data.ServiceIndication %]</sh:ServiceIndication>
+            <sh:OriginHost>[% Data.OriginHost %]</sh:OriginHost>
+        </sh:ShPull>
+    </soapenv:Body>
+</soapenv:Envelope>
